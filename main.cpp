@@ -7,6 +7,7 @@
 #include <QHostAddress>
 #include <QByteArray>
 #include <QBuffer>
+#include <QImage>
 #include <list>
 #include <mutex>
 #include <map>
@@ -32,6 +33,7 @@ public:
                                    std::chrono::system_clock::now().time_since_epoch()).count();
         if (now - setClipboardTime < 1000) {
             qDebug() << "just set clipboard, ignore";
+            return;
         }
         QByteArray array;
         QBuffer buf(&array);
@@ -49,6 +51,7 @@ public:
                            std::chrono::system_clock::now().time_since_epoch()).count();
         if (now - setClipboardTime < 1000) {
             qDebug() << "just set clipboard, ignore";
+            return;
         }
         QByteArray array = str.toUtf8();
         writeHeader(DataType::TEXT, array.size());
@@ -69,7 +72,7 @@ public:
             leftToRecv -= data.size();
             if (leftToRecv == 0) {
                 if (stage == ReadStage::HEADER) {
-                    type = DataType(recvBuf[0]);
+                    type = DataType(recvBuf.at(0));
                     leftToRecv = ((recvBuf[1] & 0xFF) << 24) | ((recvBuf[2] & 0xFF) << 16) | ((recvBuf[3] & 0xFF) << 8) | ((recvBuf[4] & 0xFF));
                     if (leftToRecv > 0) {
                         stage = ReadStage::BODY;
