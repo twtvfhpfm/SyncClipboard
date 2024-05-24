@@ -29,6 +29,7 @@ public:
     }
 
     void writeImage(QImage img) {
+        qDebug() << "writeImage";
         uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
                                    std::chrono::system_clock::now().time_since_epoch()).count();
         if (now - setClipboardTime < 1000) {
@@ -47,6 +48,7 @@ public:
     }
 
     void writeText(QString str) {
+        qDebug() << "writeText";
         uint64_t now = std::chrono::duration_cast<std::chrono::milliseconds>(
                            std::chrono::system_clock::now().time_since_epoch()).count();
         if (now - setClipboardTime < 1000) {
@@ -155,15 +157,19 @@ public:
     }
 public slots:
     void onClipboardChange() {
-        qDebug() << "clipboard change, text: " << b->text() << ", image: " << b->image();
-        if (!b->image().isNull()) {
+        QImage img = b->image();
+        QString txt = b->text();
+        qDebug() << "clipboard change, text: " << txt << ", image: " << img;
+        qDebug() << "image is Null: " << img.isNull();
+        if (!img.isNull()) {
+            qDebug() << "iterate workerMap";
             for(auto iter = workerMap.begin(); iter != workerMap.end(); iter++) {
-                iter->second->writeImage(b->image());
+                iter->second->writeImage(img);
             }
         }
-        if (!b->text().isEmpty()) {
+        if (!txt.isEmpty()) {
             for(auto iter = workerMap.begin(); iter != workerMap.end(); iter++) {
-                iter->second->writeText(b->text());
+                iter->second->writeText(txt);
             }
         }
     }
